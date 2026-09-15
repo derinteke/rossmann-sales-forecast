@@ -110,7 +110,7 @@ rossmann-sales-forecast/
 ## 🚀 Getting started / Başlangıç
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/derinteke/rossmann-sales-forecast.git
 cd rossmann-sales-forecast
 
 python -m venv venv
