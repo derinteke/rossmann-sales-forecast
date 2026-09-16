@@ -5,10 +5,10 @@ ahead — the same setup as the Kaggle competition. What I cared about most wasn
 score, but doing it *honestly*: no data leakage, and a real baseline to prove the model
 actually learns something.
 
-**TR —** Bunu 1.115 Rossmann mağazasının günlük satışını 6 hafta ileriye tahmin etmek için
-yaptım — Kaggle yarışmasıyla aynı kurulum. En çok önemsediğim şey gösterişli bir skor değil,
-işi *dürüst* yapmaktı: veri sızıntısı olmadan ve modelin gerçekten bir şey öğrendiğini
-kanıtlayan gerçek bir baseline'la.
+**TR —** 1.115 Rossmann mağazasının günlük satışını 6 hafta öncesinden tahmin eden bir model
+kurdum; kurulum Kaggle yarışmasındakiyle birebir aynı. Derdim yüksek bir skor tutturmak
+değildi, işi düzgün yapmaktı: veri sızıntısına düşmeden, modelin gerçekten bir şey öğrenip
+öğrenmediğini görebileceğim sağlam bir baseline ile kıyaslayarak.
 
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
 ![LightGBM](https://img.shields.io/badge/LightGBM-tuned-green)
@@ -22,8 +22,8 @@ kanıtlayan gerçek bir baseline'la.
 **EN —** I evaluated everything on a time-based hold-out (the last 6 weeks), using RMSPE —
 the competition metric. Here's where I landed:
 
-**TR —** Her şeyi zaman-bazlı bir hold-out'ta (son 6 hafta) ve yarışma metriği olan RMSPE
-ile ölçtüm. Vardığım nokta şu:
+**TR —** Her şeyi zamana göre ayırdığım bir hold-out'ta (son 6 hafta) ve yarışmanın metriği
+olan RMSPE üzerinden ölçtüm. Sonuçlar şöyle:
 
 | Model | RMSPE | RMSE | MAE |
 |-------|:-----:|:----:|:---:|
@@ -36,10 +36,10 @@ bit more off (0.128 → 0.124). Because it clearly beats a strong naive baseline
 it's learning real structure rather than echoing the average. For reference, good single
 models in the Kaggle competition scored around 0.11–0.13.
 
-**TR —** Tuned modelim baseline hatasını neredeyse yarıya indiriyor, tuning de biraz daha
-düşürdü (0.128 → 0.124). Naif baseline'ı açık ara geçtiği için, ortalamayı tekrarlamak yerine
-gerçek yapı öğrendiğine güveniyorum. Referans olarak, yarışmadaki iyi tek modeller ~0.11-0.13
-alıyordu.
+**TR —** Ayarladığım model baseline hatasını neredeyse yarıya indiriyor; tuning'in kendisi de
+skoru biraz daha çekti (0.128 → 0.124). Naif baseline'ı bu kadar geride bıraktığına göre model
+sadece ortalamayı tekrarlamıyor, verideki asıl örüntüyü yakalıyor. Kıyas olsun diye: yarışmada
+iyi sayılan tek modeller 0.11-0.13 bandındaydı.
 
 <p align="center">
   <img src="reports/figures/forecast_store_262.png" width="760">
@@ -60,12 +60,12 @@ historical aggregates that I fit **only on the training split** (a store's typic
 weekday, and under promo vs not). It's the honest way to give the model store history without
 cheating.
 
-**TR —** Gerçek görev, *elimde yakın tarihli satış olmadan* 6 hafta tahmin etmek. Bu yüzden
-dünün ya da geçen haftanın satışını feature olarak kullanamazdım — bu sızıntı olurdu. Onun
-yerine, tahmin anında zaten bileceğim şeylere (takvim, promosyon, tatil, mağaza metası) ve
-**yalnızca eğitim verisinden** hesapladığım geçmiş ortalamalara (mağazanın gün bazında ve
-promosyonlu/promosyonsuz tipik satışı) dayandım. Bu, modele geçmişi hile yapmadan vermenin
-dürüst yolu.
+**TR —** İşin özü şu: elimde yakın tarihli satış verisi olmadan 6 hafta ileriyi tahmin etmem
+gerekiyor. Yani dünün ya da geçen haftanın satışını feature olarak kullanmak yasak, kullansam
+sızıntı olurdu. Onun yerine tahmin anında zaten bileceğim şeylere dayandım (takvim, promosyon,
+tatil, mağaza bilgileri); bir de **sadece eğitim verisinden** çıkardığım geçmiş ortalamalara
+(mağazanın gün gün, promosyonlu ve promosyonsuz tipik satışı). Modele geçmişini hile yapmadan
+öğretmenin dürüst yolu bu.
 
 ### 2. Tuning without peeking / Peeking'siz tuning
 
@@ -74,18 +74,18 @@ on the 6 weeks *before* it, and I even picked the number of trees using a separa
 split — so the real hold-out stayed untouched until the single final measurement. That's why
 I believe the 0.124 is a fair number and not a lucky fit.
 
-**TR —** Optuna ile tuning yaparken final validasyon penceresine bakmayı reddettim. Ondan
-*önceki* 6 haftada tune ettim, ağaç sayısını bile ayrı bir iç bölmeyle seçtim — böylece
-gerçek hold-out, tek seferlik final ölçüme kadar el değmemiş kaldı. 0.124'ün şanslı bir uyum
-değil, adil bir sayı olduğuna bu yüzden inanıyorum.
+**TR —** Optuna ile tuning yaparken asıl validasyon penceresine hiç bakmadım. Ondan bir önceki
+6 hafta üzerinde tune ettim, ağaç sayısını bile ayrı bir iç bölmeyle belirledim; böylece gerçek
+hold-out, en sondaki tek ölçüme kadar hiç el değmeden durdu. 0.124'ün şans eseri denk gelmiş
+değil, hakkıyla çıkmış bir sayı olduğuna bu yüzden güveniyorum.
 
 ## 🔑 What the data told me / Verinin bana söyledikleri
 
 **EN / TR:**
-- **Promotions really move sales — about +39%.** / **Promosyon satışı gerçekten hareketlendiriyor — yaklaşık +%39.**
-- **There's a strong weekly rhythm** (Monday & Sunday high, Saturday low). / **Güçlü bir haftalık ritim var** (Pazartesi & Pazar yüksek, Cumartesi düşük).
-- **December peaks** ~24% above an average month. / **Aralık zirvesi**, ortalama bir aydan ~%24 yüksek.
-- **A store's own history is the best predictor** — it dominates the SHAP importance. / **Mağazanın kendi geçmişi en iyi öngörücü** — SHAP önem grafiğine hakim.
+- **Promotions really move sales — about +39%.** / **Promosyon satışı ciddi biçimde artırıyor: yaklaşık +%39.**
+- **There's a strong weekly rhythm** (Monday & Sunday high, Saturday low). / **Belirgin bir haftalık ritim var** (Pazartesi ve Pazar yüksek, Cumartesi düşük).
+- **December peaks** ~24% above an average month. / **Aralık ayı zirve yapıyor**, ortalama bir aya göre ~%24 yukarıda.
+- **A store's own history is the best predictor** — it dominates the SHAP importance. / **En iyi tahmin edici, mağazanın kendi geçmişi**; SHAP önem grafiğine de açık ara o hakim.
 
 ## 🗂️ Project structure / Proje yapısı
 
@@ -130,17 +130,17 @@ jupyter notebook notebooks/01_sales_forecast.ipynb
 with a confidence band, and I'd wrap the model in a small FastAPI + Streamlit app so someone
 could actually pull up a store and see its six-week outlook.
 
-**TR —** Sıradaki adım olarak mağaza bazında tahmin aralıkları (quantile LightGBM) eklerdim ki
-tahmin bir güven bandıyla gelsin; bir de modeli küçük bir FastAPI + Streamlit uygulamasına
-sarardım ki biri gerçekten bir mağazayı açıp 6 haftalık görünümünü görebilsin.
+**TR —** Sırada ne var dersen: mağaza bazında tahmin aralıkları (quantile LightGBM) eklerdim ki
+her tahmin bir güven bandıyla gelsin. Bir de modeli küçük bir FastAPI + Streamlit uygulamasına
+sarıp, birinin gerçekten bir mağaza seçip 6 haftalık gidişatını görebilmesini sağlardım.
 
 ## 📚 Data / Veri
 
 **EN —** Rossmann Store Sales (Kaggle): daily sales for 1,115 German drugstores,
 Jan 2013 – Jul 2015, with promo, holiday and competition metadata.
 
-**TR —** Rossmann Store Sales (Kaggle): 1.115 Alman mağazasının günlük satışı,
-Oca 2013 – Tem 2015; promosyon, tatil ve rakip bilgileriyle.
+**TR —** Rossmann Store Sales (Kaggle): 1.115 Alman mağazasının Oca 2013 – Tem 2015 arası
+günlük satışları; promosyon, tatil ve rakip bilgileriyle birlikte.
 
 ## 📄 License
 
